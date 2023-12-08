@@ -28,7 +28,7 @@ jobs:
          tags: ${{ secrets.DOCKERHUB_USERNAME }}/newlab4image:${{ github.sha }}
 
      - name: Deploy to EC2
-       uses: easingthemes/ssh-action@main
+       uses: appleboy/ssh-action@master
        env:
          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
          REMOTE_HOST: ${{ secrets.HOST_DNS }}
