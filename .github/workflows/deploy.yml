@@ -1,0 +1,40 @@
+name: Docker CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v2
+       
+     - name: Login to Dockerhub
+       uses: docker/login-action@v1
+       with:
+         username: ${{ secrets.DOCKERHUB_USERNAME }}
+         password: ${{ secrets.DOCKERHUB_TOKEN }}
+     
+     - name: Build and push Docker image
+       uses: docker/build-push-action@v2
+       with:
+         context: .
+         
+         push: true
+         tags: ${{ secrets.DOCKERHUB_USERNAME }}/newlab4image:${{ github.sha }}
+
+     - name: Deploy to EC2
+       uses: appleboy/ssh-action@master
+       env:
+         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+         REMOTE_HOST: ${{ secrets.HOST_DNS }}
+         REMOTE_USER: ${{ secrets.USERNAME }}
+         script: |
+            docker stop newlab4image || true
+            docker rm newlab4image || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/newlab4image:${{ github.sha }}
+            docker run -d --name webapp -p 80:80 ${{ secrets.DOCKER_USERNAME }}/newlab4image:${{ github.sha }}
