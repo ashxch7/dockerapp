@@ -1,4 +1,4 @@
-FROM nginx:latest
-COPY index.html /usr/share/nginx/html/index.html
-EXPOSE 80
-CMD ["nginx" ,"-g", "daemon off;"]
+FROM httpd:2.4
+ 
+COPY *.html /usr/local/apache2/htdocs/
+
